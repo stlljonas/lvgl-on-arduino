@@ -1,7 +1,4 @@
 #include <lvgl.h>
-//#include <lv_examples.h>
-//#include <lv_demos.h>
-#include <demos/lv_demos.h>
 #include <TFT_eSPI.h>
 
 // following https://github.com/lvgl/lvgl/blob/master/examples/arduino/LVGL_Arduino/LVGL_Arduino.ino
@@ -22,16 +19,13 @@ int tab_idx = 0;
 
 /* Display flushing */
 void my_disp_flush( lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p ) {
-    // uint32_t w = ( area->x2 - area->x1 + 1 ); // this is incorrect
-    // uint32_t h = ( area->y2 - area->y1 + 1 ); // this also
-    uint32_t w = ( area->x2 - area->x1 + 1 ); // these seem right after inspecting
-    uint32_t h = ( area->y2 - area->y1 + 1 ); // setAddrWindow()
+    uint32_t w = ( area->x2 - area->x1 + 1 );
+    uint32_t h = ( area->y2 - area->y1 + 1 );
     tft.startWrite();
     tft.setAddrWindow( area->x1, area->y1, w, h );
-    tft.pushColors( ( uint16_t * )&color_p->full, w * h, true ); // whats this color_p->full?
+    tft.pushColors( ( uint16_t * )&color_p->full, w * h, true );
     tft.endWrite();
-
-    lv_disp_flush_ready( disp ); // ??
+    lv_disp_flush_ready( disp );
 }
 
 void setup() {
@@ -40,10 +34,9 @@ void setup() {
     tft.setRotation(1); // on change, hor_res and ver_res of disp_drv might need to be switched
     lv_disp_draw_buf_init( &draw_buf, buf, NULL, N_PX_W * 10 );
 
-    /*Initialize the display*/
     static lv_disp_drv_t disp_drv;
     lv_disp_drv_init( &disp_drv );
-    /*Change the following line to your display resolution*/
+    // Change the following line to your display resolution
     disp_drv.hor_res = N_PX_H;
     disp_drv.ver_res = N_PX_W;
     disp_drv.flush_cb = my_disp_flush;
@@ -66,7 +59,7 @@ void setup() {
     lv_label_set_text(content2, "Tab2 content");
     lv_label_set_text(content3, "Tab3 content");
 }
-void loop() { // loop looks good
+void loop() {
     if (millis() - last_tab_switch_timestamp >= tab_switch_time_ms) {
         tab_idx = (tab_idx+1)%3;
         lv_tabview_set_act(tab_view, tab_idx, LV_ANIM_ON);
