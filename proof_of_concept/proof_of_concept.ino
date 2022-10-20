@@ -16,6 +16,10 @@ static lv_obj_t * tab_view;
 TFT_eSPI tft =
     TFT_eSPI(N_PX_W, N_PX_H); // Invoke library, pins defined in User_Setup.h
 
+unsigned long tab_switch_time_ms = 1000;
+unsigned long last_tab_switch_timestamp = 0;
+int tab_idx = 0;
+
 /* Display flushing */
 void my_disp_flush( lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p ) {
     // uint32_t w = ( area->x2 - area->x1 + 1 ); // this is incorrect
@@ -31,11 +35,11 @@ void my_disp_flush( lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *colo
 }
 
 void setup() {
-    lv_init(); // seems fine
-    tft.begin(); // yup
+    lv_init();
+    tft.begin();
     tft.setRotation(1); // on change, hor_res and ver_res of disp_drv might need to be switched
     lv_disp_draw_buf_init( &draw_buf, buf, NULL, N_PX_W * 10 );
-    
+
     /*Initialize the display*/
     static lv_disp_drv_t disp_drv;
     lv_disp_drv_init( &disp_drv );
@@ -45,20 +49,29 @@ void setup() {
     disp_drv.flush_cb = my_disp_flush;
     disp_drv.draw_buf = &draw_buf;
     lv_disp_drv_register( &disp_drv );
-    // lv_demo_widgets();
 
-    // trying to follow the demo_widgets example
-    // lv_obj_t * label1 = lv_label_create(lv_scr_act());
-    lv_coord_t tab_h = 20; // h = height??
-    tab_view = lv_tabview_create(lv_scr_act(), LV_DIR_TOP, tab_h);
-    lv_obj_t * t1 = lv_tabview_add_tab(tab_view, "Profile");
-    lv_obj_t * t2 = lv_tabview_add_tab(tab_view, "Analytics");
-    lv_obj_t * t3 = lv_tabview_add_tab(tab_view, "Shop");
-    // lv_style_init(&style_text_muted);
-    // lv_style_set_text_opa(&style_text_muted, LV_OPA_50);
+    lv_coord_t tab_height = N_PX_W/6; // h = height !
 
+    // Create tabview
+    tab_view = lv_tabview_create(lv_scr_act(), LV_DIR_TOP, tab_height);
+    lv_obj_t * t1 = lv_tabview_add_tab(tab_view, "Tab1");
+    lv_obj_t * t2 = lv_tabview_add_tab(tab_view, "Tab2");
+    lv_obj_t * t3 = lv_tabview_add_tab(tab_view, "Tab3");
+
+    // Add content to tab in from of label
+    lv_obj_t * content1 = lv_label_create(t1);
+    lv_obj_t * content2 = lv_label_create(t2);
+    lv_obj_t * content3 = lv_label_create(t3);
+    lv_label_set_text(content1, "Tab1 content");
+    lv_label_set_text(content2, "Tab2 content");
+    lv_label_set_text(content3, "Tab3 content");
 }
 void loop() { // loop looks good
+    if (millis() - last_tab_switch_timestamp >= tab_switch_time_ms) {
+        tab_idx = (tab_idx+1)%3;
+        lv_tabview_set_act(tab_view, tab_idx, LV_ANIM_ON);
+        last_tab_switch_timestamp = millis();
+    }
     lv_timer_handler(); /* let the GUI do its work */
     delay(5);
 }
