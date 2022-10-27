@@ -87,6 +87,7 @@ void setup() {
     lv_disp_drv_register( &disp_drv );
 
     screen = lv_scr_act();
+    lv_obj_set_scrollbar_mode(screen, LV_SCROLLBAR_MODE_OFF);
 
     // Create dark style
     static lv_style_t dark_style;
@@ -121,7 +122,12 @@ void loop() {
         char buffer[6];
         int ret = snprintf(buffer, sizeof buffer, "%01f", value);    
         working_widget = create_widget(quantity, buffer, unit, device_name, screen, highlight_color);
-
+        lv_anim_init(&hor_swipe);
+        lv_anim_set_exec_cb(&hor_swipe, (lv_anim_exec_xcb_t) lv_obj_set_x);
+        lv_anim_set_var(&hor_swipe, working_widget.widget);
+        lv_anim_set_time(&hor_swipe, 1000); // in ms
+        lv_anim_set_values(&hor_swipe, 0, 100);
+        lv_anim_start(&hor_swipe);
     } else {
         value += 1;
         char buffer[6];
