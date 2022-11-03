@@ -26,7 +26,10 @@ struct sensor_widget{
     lv_obj_t * value_label;
 };
 
-static sensor_widget working_widget;
+static sensor_widget working_widget_1;
+static sensor_widget working_widget_2;
+static lv_anim_t slide_out_horizontal_anim;
+static lv_anim_t slide_in_horizontal_anim;
 
 LV_IMG_DECLARE(sensi_logo_small); // required if online converter was used
 
@@ -61,6 +64,25 @@ sensor_widget create_widget(const char* quantity, char* value, const char* unit,
     return {widg, value_label};
 }
 
+sensor_widget create_and_slide_in(const char* quantity, char* value, const char* unit, const char* device_name, lv_obj_t * parent, lv_color_t highlight_color = lv_color_white()) {
+    // Create the object
+    sensor_widget new_widget = create_widget(quantity, value, unit, device_name, parent, highlight_color);
+    // Position it outside of screen
+    int widget_width = lv_obj_get_width(new_widget.widget);
+    int parent_width = lv_obj_get_width(new_widget.widget->parent);
+    // lv_obj_set_pos(new_widget.widget, -widget_width, 0);
+
+    // Move to center
+    
+    lv_anim_init(&slide_in_horizontal_anim);
+    lv_anim_set_exec_cb(&slide_in_horizontal_anim, (lv_anim_exec_xcb_t) lv_obj_set_x);
+    lv_anim_set_var(&slide_in_horizontal_anim, new_widget.widget);
+    lv_anim_set_time(&slide_in_horizontal_anim, 500); // in ms
+    lv_anim_set_values(&slide_in_horizontal_anim, -((widget_width + parent_width)/2), 0);
+    lv_anim_start(&slide_in_horizontal_anim);
+    return new_widget;
+}
+
 /* Display flushing */
 void my_disp_flush( lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p ) {
     uint32_t w = ( area->x2 - area->x1 + 1 );
@@ -70,6 +92,33 @@ void my_disp_flush( lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *colo
     tft.pushColors( ( uint16_t * )&color_p->full, w * h, true );
     tft.endWrite();
     lv_disp_flush_ready( disp );
+}
+
+void slide_out_and_delete(lv_obj_t * obj) {
+    // lv_anim_init(&slide_out_horizontal_anim);
+    // lv_anim_set_exec_cb(&slide_out_horizontal_anim, (lv_anim_exec_xcb_t) lv_obj_set_x);
+    // lv_anim_set_var(&slide_out_horizontal_anim, working_widget.widget);
+    // lv_anim_set_time(&slide_out_horizontal_anim, 1000); // in ms
+    // lv_anim_set_values(&slide_out_horizontal_anim, 0, 100);
+    // lv_anim_start(&hor_swipe);
+
+    int widget_width = lv_obj_get_width(obj);
+    int parent_width = lv_obj_get_width(obj->parent);
+
+    lv_anim_init(&slide_out_horizontal_anim);
+    lv_anim_set_exec_cb(&slide_out_horizontal_anim, (lv_anim_exec_xcb_t) lv_obj_set_x);
+    lv_anim_set_var(&slide_out_horizontal_anim, obj);
+    lv_anim_set_time(&slide_out_horizontal_anim, 500); // in ms
+    
+    lv_anim_set_values(&slide_out_horizontal_anim, 0, ((widget_width + parent_width)/2));
+    // void read_cb = [](obj) {lv_obj_del(obj)}
+    // lv_anim_set_ready_cb(&slide_out_horizontal_anim, lv_obj_del(obj));
+    // lv_anim_exec_xcb_t
+    // lv_obj_del_async(obj);
+    // lv_obj_del_anim_ready_cb(&slide_out_horizontal_anim);
+    lv_anim_set_ready_cb(&slide_out_horizontal_anim, lv_obj_del_anim_ready_cb);
+    // lv_anim_set_ready_cb(&slide_out_horizontal_anim, lv_anim_del);
+    lv_anim_start(&slide_out_horizontal_anim);
 }
 
 void setup() {
@@ -117,27 +166,42 @@ void loop() {
     lv_color_t highlight_color = lv_color_hex(0x00FF00); // green
 
     // lv_label_set_text(value_label, buffer);
-    if (working_widget.widget == NULL) {
+    if (working_widget_1.widget == NULL) {
         value = 0.0;
         char buffer[6];
-        int ret = snprintf(buffer, sizeof buffer, "%01f", value);    
-        working_widget = create_widget(quantity, buffer, unit, device_name, screen, highlight_color);
-        lv_anim_init(&hor_swipe);
-        lv_anim_set_exec_cb(&hor_swipe, (lv_anim_exec_xcb_t) lv_obj_set_x);
-        lv_anim_set_var(&hor_swipe, working_widget.widget);
-        lv_anim_set_time(&hor_swipe, 1000); // in ms
-        lv_anim_set_values(&hor_swipe, 0, 100);
-        lv_anim_start(&hor_swipe);
+        int ret = snprintf(buffer, sizeof buffer, "%01f", value);
+        working_widget_1 = create_and_slide_in(quantity, buffer, unit, device_name, screen, highlight_color);
+        // lv_anim_init(&slide_out_horizontal_anim);
+        // lv_anim_set_exec_cb(&slide_out_horizontal_anim, (lv_anim_exec_xcb_t) lv_obj_set_x);
+        // lv_anim_set_var(&slide_out_horizontal_anim, working_widget.widget);
+        // lv_anim_set_time(&slide_out_horizontal_anim, 1000); // in ms
+        // lv_anim_set_values(&slide_out_horizontal_anim, 0, 100);
+        // lv_anim_start(&hor_swipe);
+
+        // lv_anim_init(&hor_swipe);
+        // lv_anim_set_exec_cb(&hor_swipe, (lv_anim_exec_xcb_t) lv_obj_set_x);
+        // lv_anim_set_var(&hor_swipe, working_widget.widget);
+        // lv_anim_set_time(&hor_swipe, 10000); // in ms
+        // lv_anim_set_values(&hor_swipe, 0, 100);
+        // lv_anim_start(&hor_swipe);
     } else {
         value += 1;
         char buffer[6];
 
         int ret = snprintf(buffer, sizeof buffer, "%01f", value);    
-        lv_label_set_text(working_widget.value_label, buffer);
+        lv_label_set_text(working_widget_1.value_label, buffer);
+        if (value == 100) {
+            slide_out_and_delete(working_widget_1.widget);
+            create_and_slide_in(quantity, buffer, unit, device_name, screen, highlight_color);
+            // we need a method that replaces the current widget.
+            // most notabl, it needs to create a new widget (widget_2), slide out the old widget (widget_1), 
+            // slide in the new widget, delete widget_1 and set widget_1 to the new widget (widget_2 should now be 0).
+            // this is actually useful as we can use th
+        }
     }
     // Build a sensor reading widget
     // lv_obj_clean(screen); // implicit deletion of dynamically allocated widget
     // lv_color_t highlight_color = lv_color_hex(0xFF0000); // red
     lv_timer_handler(); /* let the GUI do its work */
-    delay(5);
+    delay(50);
 }
