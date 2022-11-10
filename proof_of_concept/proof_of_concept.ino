@@ -1,3 +1,4 @@
+#include "Button2.h"
 #include <lvgl.h>
 #include <TFT_eSPI.h>
 #include "orientation.h"
@@ -7,6 +8,13 @@
 
 #define N_PX_W 135 // width
 #define N_PX_H 240 // height
+
+// Buttons to control displayed values
+#define BUTTON_1 35
+#define BUTTON_2 0
+
+Button2 btn_right(BUTTON_1);
+Button2 btn_left(BUTTON_2);
 
 static lv_disp_draw_buf_t draw_buf;
 static lv_color_t buf[ N_PX_W * 10]; // this can be smaller, idk the minimal number for it to work
@@ -164,7 +172,33 @@ void my_disp_flush( lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *colo
     lv_disp_flush_ready( disp );
 }
 
+void setupButtons() {
+  btn_left.setPressedHandler([](Button2 &b) {
+    Serial.printf("Left button pressed\n");
+    value = 0;
+    char value_buffer[6];
+    snprintf(value_buffer, sizeof value_buffer, "%01f", value);    
+    create_widget(temp_widget, quantity, value_buffer, unit, device_name, screen); //, highlight_color);
+    switch_widget_vertical(temp_widget);
+  });
+
+  btn_right.setPressedHandler([](Button2 &b) {
+    Serial.printf("Right button pressed\n");
+    value = 0;
+    char value_buffer[6];
+    snprintf(value_buffer, sizeof value_buffer, "%01f", value);    
+    create_widget(temp_widget, quantity, value_buffer, unit, device_name, screen); //, highlight_color);
+    switch_widget_vertical(temp_widget);
+  });
+}
+
+void buttonLoop() {
+  btn_left.loop();
+  btn_right.loop();
+}
+
 void setup() {
+    setupButtons();
     lv_init();
     tft.begin();
     tft.setRotation(1); // on change, hor_res and ver_res of disp_drv (below) might need to be switched
@@ -201,7 +235,7 @@ void setup() {
     lv_obj_add_flag(logo, LV_OBJ_FLAG_HIDDEN);
     lv_timer_handler();
     Serial.println((int)screen);
-    
+
     // Show initial widget
     value = 0.0;
     char value_buffer[6];
@@ -211,17 +245,7 @@ void setup() {
 }
 
 void loop() {
-    Serial.println("loop");
-    Serial.println("Current widget:");
-    Serial.println((int)current_widget.widget);
-    Serial.println((int)current_widget.value_label);
-    Serial.println("Temp widget:");
-    Serial.println((int)temp_widget.widget);
-    Serial.println((int)temp_widget.value_label);
-    Serial.println("out anim");
-    Serial.println((int)&slide_out_anim);
-    Serial.println("in anim");
-    Serial.println((int)&slide_in_anim);
+    buttonLoop();
 
     lv_color_t highlight_color = lv_color_hex(0x00FF00); // green
 
@@ -229,11 +253,11 @@ void loop() {
     char value_buffer[6];
     snprintf(value_buffer, sizeof value_buffer, "%01f", value);    
     lv_label_set_text(current_widget.value_label, value_buffer);
-    if (value >= 10 && temp_widget.widget == nullptr) {
-        value = 0;
-        create_widget(temp_widget, quantity, value_buffer, unit, device_name, screen, highlight_color);
-        switch_widget_vertical(temp_widget);
-    }
+    // if (value >= 10 && temp_widget.widget == nullptr) {
+    //     value = 0;
+    //     create_widget(temp_widget, quantity, value_buffer, unit, device_name, screen, highlight_color);
+    //     switch_widget_vertical(temp_widget);
+    // }
 
     // Build a sensor reading widget
     // lv_obj_clean(screen); // implicit deletion of dynamically allocated widget
