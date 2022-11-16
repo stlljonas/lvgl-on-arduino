@@ -8,12 +8,12 @@
 
 // following https://github.com/lvgl/lvgl/blob/master/examples/arduino/LVGL_Arduino/LVGL_Arduino.ino
 
-#define N_PX_W 135 // width
-#define N_PX_H 240 // height
+#define N_PX_W 170//135 // width
+#define N_PX_H 320//240 // height
 
 // Buttons to control displayed values
 #define BUTTON_1 0
-#define BUTTON_2 35
+#define BUTTON_2 14//35
 
 Button2 btn_right(BUTTON_1);
 Button2 btn_left(BUTTON_2);
@@ -464,5 +464,5 @@ void loop() {
     // lv_obj_clean(screen); // implicit deletion of dynamically allocated widget
     // lv_color_t highlight_color = lv_color_hex(0xFF0000); // red
     lv_timer_handler(); /* let the GUI do its work */
-    delay(10);
+    delay(40); // comes out to a (theoretical) 25 Hz
 }
