@@ -2,8 +2,8 @@
 #include <TFT_eSPI.h>
 // DDN'T include the genereated .c image file
 
-#define N_PX_W 135 // width
-#define N_PX_H 240 // height
+#define N_PX_W 170 // width
+#define N_PX_H 320 // height
 
 static lv_disp_draw_buf_t draw_buf;
 static lv_color_t buf[ N_PX_W * 10]; // this can be smaller, idk the minimal number for it to work

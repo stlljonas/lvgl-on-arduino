@@ -10,6 +10,9 @@ There are currently three versions to use in this repo.
 	It can be found [here](https://github.com/Xinyuan-LilyGO/T-Display-S3/tree/main/lib).
 	Make sure to use the correct board if you are using the Arduino IDE. I had to update
 	the "additional board manager" url for it to show up.
+
+	This sketch also needs the montserrat_30 font to be enabled. Do this by setting the LV_FONT_MONTSERRAT_30 macro to 1. It is found in the `lv_conf.h` file next to the lvgl directory (or the `lvgl/lv_conf.h` file if that doesn't work).
+
 2. Display image
 	This is a separate sketch also on the main branch. It shows how to display and image that
 	was converted through LVGLs online [image converter tool](https://lvgl.io/tools/imageconverter).
@@ -18,3 +21,7 @@ There are currently three versions to use in this repo.
 3. Bare Bones
 	This is a separate branch (bare-bones) that contains a minimal running sketch that displays "hello world".
 	Again, this is currently only setup for the original T-Display board and needs to be adjusted as before. 
+
+# PlatformIO hints
+
+You will need to clone https://github.com/Xinyuan-LilyGO/T-Display-S3 into your home directory. For another location (e.g. `~/Arduino/libraries`), change `~/T-Display-S3/lib` to your path in `platformio.ini` (e.g. `~/Arduino/libraries/T-Display-S3/lib`).
